@@ -1,4 +1,4 @@
-import { FaAd, FaCalendar, FaHome, FaList, FaSearch, FaShoppingCart } from "react-icons/fa";
+import { FaAd, FaCalendar, FaEnvelope, FaHome, FaList, FaSearch, FaShoppingCart, FaVoicemail } from "react-icons/fa";
 import { NavLink, Outlet } from "react-router-dom";
 import useCart from "../hooks/useCart";
 
@@ -6,6 +6,8 @@ import useCart from "../hooks/useCart";
 const Dashboard = () => {
 
     const [cart] = useCart();
+
+    const isAdmin = true;
     return (
         <div className="flex">
 
@@ -63,7 +65,15 @@ const Dashboard = () => {
                         
                         <NavLink to="/order/salad">
                         <FaSearch></FaSearch>
-                        Search</NavLink>
+                        Menu</NavLink>
+                        
+                        </li>
+
+                        <li>
+                        
+                        <NavLink to="/order/contact">
+                        <FaEnvelope></FaEnvelope>
+                        Contact</NavLink>
                         
                         </li>
                 </ul>

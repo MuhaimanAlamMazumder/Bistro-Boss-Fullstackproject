@@ -5,40 +5,81 @@ import { useForm } from "react-hook-form";
 import { AuthContext } from "../../providers/AuthProvider";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
+import useAxiosPublic from "../../hooks/useAxiosPublic";
+import SocialLogin from "../../components/SocialLogin/SocialLogin";
 
 
 
 const SignUp = () => {
+    const axiosPublic = useAxiosPublic();
     const { register, handleSubmit, reset,  formState: { errors } } = useForm();
     const {createUser, updateUserProfile} = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const onSubmit = data => {
-        console.log(data);
-        createUser(data.email, data.password)
-        .then(result =>{
-
-            const loggedUser = result.user;
-            console.log(loggedUser);
-            updateUserProfile(data.name, data.photoUrl)
-            .then(() =>{
-              console.log('user profile info update')
-              reset();
+    const onSubmit = (data) => {
+      createUser(data.email, data.password)
+        .then((result) => {
+          const loggedUser = result.user;
+          console.log(loggedUser);
+    
+          updateUserProfile(data.name, data.photoUrl)
+            .then(() => {
+              const userInfo = {
+                name: data.name,
+                email: data.email,
+              };
+    
+              axiosPublic.post("/users", userInfo)
+                .then((res) => {
+                  if (res.data.insertedId) {
+                    console.log('user added to the database');
+                    reset();
+                    Swal.fire({
+                      position: "top-end",
+                      icon: "success",
+                      title: "User created successfully",
+                      showConfirmButton: false,
+                      timer: 1500,
+                    });
+                    navigate("/");
+                  }
+                })
+                .catch((error) => {
+                  console.error("DB save error:", error);
+                  Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Failed to save user",
+                    text: error.message,
+                    showConfirmButton: true,
+                  });
+                });
+            })
+            .catch((error) => {
+              console.error("Profile update error:", error);
               Swal.fire({
                 position: "top-end",
-                icon: "success",
-                title: "User created successfully",
-                showConfirmButton: false,
-                timer: 1500
+                icon: "error",
+                title: "Profile update failed",
+                text: error.message,
+                showConfirmButton: true,
               });
-              navigate('/');
-
-
-            })
-            .catch(error => console.log(error))
+            });
         })
-    
+        .catch((error) => {
+          console.error("User creation error:", error);
+          Swal.fire({
+            position: "top-end",
+            icon: "error",
+            title: "User creation failed",
+            text: error.message,
+            showConfirmButton: true,
+          });
+        });
     };
+    
+    
+    
     
     return (
         <>
@@ -95,7 +136,8 @@ const SignUp = () => {
                 
               </div>
             </form>
-            <p><small>Already have an account ? <Link to="/login">log in</Link></small></p>
+            <p className="px-6"><small>Already have an account ? <Link to="/login">log in</Link></small></p>
+            <SocialLogin></SocialLogin>
           </div>
         </div>
       </div>
